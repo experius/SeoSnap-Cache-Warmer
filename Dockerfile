@@ -8,4 +8,4 @@ COPY requirements.txt /code/
 RUN pip install -r requirements.txt
 COPY . /code/
 
-ENTRYPOINT python crawl.py
+ENTRYPOINT ["/usr/local/bin/python", "./crawl.py"]
