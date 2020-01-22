@@ -1,7 +1,7 @@
+import os
 import urllib.parse as urllib
 from typing import Dict
 
-from scrapy import Request
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -11,14 +11,18 @@ from seosnap_cachewarmer.service import SeosnapService
 class SeosnapSpider(SitemapSpider):
     website_id: int
     follow_next: bool
+    recache: bool
+    cacheserver_url: str
     service: SeosnapService
     extract_fields: Dict[str, str]
     name = 'Seosnap'
 
-    def __init__(self, website_id, follow_next=True) -> None:
+    def __init__(self, website_id, follow_next=True, recache=True) -> None:
         self.service = SeosnapService()
-        self.follow_next = follow_next
         self.website_id = website_id
+        self.follow_next = follow_next
+        self.recache = recache
+        self.cacheserver_url = os.getenv('CACHEWARMER_CACHE_SERVER_URL').rstrip('/')
         website = self.service.get_website(self.website_id)
 
         self.name = f'Cachewarm: {website["name"]}'
@@ -38,7 +42,8 @@ class SeosnapSpider(SitemapSpider):
                 data['rel_next_url'] = rel_next_url
                 yield response.follow(rel_next_url, callback=self.parse)
 
-        url = urllib.urlparse(response.url)
+        url = response.url[len(self.cacheserver_url):].lstrip('/')
+        url = urllib.urlparse(url)
         url = urllib.urlunparse(('', '', url.path, url.params, url.query, ''))
 
         cached = bytes_to_str(response.headers.get('Rendertron-Cached', None))
@@ -47,7 +52,7 @@ class SeosnapSpider(SitemapSpider):
             'address': url,
             'content_type': bytes_to_str(response.headers.get('Content-Type', None)),
             'status_code': response.status,
-            'cache_status': 'cached' if cached == '1' else 'not-cached',
+            'cache_status': 'cached' if cached == '1' or response.status == 200 else 'not-cached',
             'cached_at': cached_at,
             'extract_fields': data
         }

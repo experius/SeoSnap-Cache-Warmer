@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os, sys
 
+from seosnap_cachewarmer import logging
 from scrapy.cmdline import execute
 from dotenv import load_dotenv
 
