@@ -36,16 +36,19 @@ class SeosnapSpider(SitemapSpider):
             for name, selector in self.extract_fields.items()
         }
 
+        # Follow next links
         if self.follow_next:
             rel_next_url = response.css('link[rel="next"]::attr(href), a[rel="next"]::attr(href)').extract_first()
             if rel_next_url is not None:
                 data['rel_next_url'] = rel_next_url
                 yield response.follow(rel_next_url, callback=self.parse)
 
+        # Strip cacheserver from the url if possible
         url = response.url[len(self.cacheserver_url):].lstrip('/')
         url = urllib.urlparse(url)
         url = urllib.urlunparse(('', '', url.path, url.params, url.query, ''))
 
+        # Build page entity for dashboard
         cached = bytes_to_str(response.headers.get('Rendertron-Cached', None))
         cached_at = bytes_to_str(response.headers.get('Rendertron-Cached-At', None))
         yield {

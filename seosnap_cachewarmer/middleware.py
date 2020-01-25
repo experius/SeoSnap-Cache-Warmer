@@ -9,6 +9,7 @@ class CacheServerMiddleware(object):
     def process_request(self, request: Request, spider: SeosnapSpider):
         if CACHE_REQUEST_FLAG not in request.meta \
                 and request.url not in spider.sitemap_urls \
+                and not request.url.endswith('sitemap.xml') \
                 and spider.cacheserver_url:
             request.meta[CACHE_REQUEST_FLAG] = True
             return request.replace(
