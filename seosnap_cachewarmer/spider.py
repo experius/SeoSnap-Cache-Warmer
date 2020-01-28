@@ -20,8 +20,8 @@ class SeosnapSpider(SitemapSpider):
     def __init__(self, website_id, follow_next=True, recache=True) -> None:
         self.service = SeosnapService()
         self.website_id = website_id
-        self.follow_next = follow_next
-        self.recache = recache
+        self.follow_next = recache not in ['false', '0']
+        self.recache = recache not in ['false', '0']
         self.cacheserver_url = os.getenv('CACHEWARMER_CACHE_SERVER_URL').rstrip('/')
         website = self.service.get_website(self.website_id)
 
