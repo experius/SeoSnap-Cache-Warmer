@@ -1,7 +1,8 @@
 import os
 import urllib.parse as urllib
-from typing import Dict
+from typing import Dict, List
 
+from scrapy import Request
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -9,12 +10,16 @@ from seosnap_cachewarmer.service import SeosnapService
 
 
 class SeosnapSpider(SitemapSpider):
+    website: dict
     website_id: int
     follow_next: bool
     recache: bool
+
     cacheserver_url: str
     service: SeosnapService
     extract_fields: Dict[str, str]
+    other_pages: List[str]
+
     name = 'Seosnap'
 
     def __init__(self, website_id, follow_next=True, recache=True) -> None:
@@ -23,12 +28,18 @@ class SeosnapSpider(SitemapSpider):
         self.follow_next = recache not in ['false', '0']
         self.recache = recache not in ['false', '0']
         self.cacheserver_url = os.getenv('CACHEWARMER_CACHE_SERVER_URL').rstrip('/')
-        website = self.service.get_website(self.website_id)
+        self.website = self.service.get_website(self.website_id)
 
-        self.name = f'Cachewarm: {website["name"]}'
-        self.extract_fields = {field['name']: field["css_selector"] for field in website["extract_fields"]}
-        sitemap_urls = [website["sitemap"]]
+        self.name = f'Cachewarm: {self.website["name"]}'
+        self.other_pages = [self.website["domain"]]
+        self.extract_fields = {field['name']: field["css_selector"] for field in self.website["extract_fields"]}
+        sitemap_urls = [self.website["sitemap"]]
         super().__init__(sitemap_urls=sitemap_urls)
+
+    def start_requests(self):
+        requests = [Request(url, self.parse) for url in self.other_pages]
+        requests += list(super().start_requests())
+        return requests
 
     def parse(self, response: Response):
         data = {
