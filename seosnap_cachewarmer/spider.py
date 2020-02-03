@@ -1,3 +1,4 @@
+import itertools
 import os
 import urllib.parse as urllib
 from typing import Dict, List
@@ -6,56 +7,37 @@ from scrapy import Request
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from seosnap_cachewarmer.service import SeosnapService
+from seosnap_cachewarmer.state import SeosnapState
 
 
 class SeosnapSpider(SitemapSpider):
-    website: dict
-    website_id: int
-    follow_next: bool
-    recache: bool
-
-    cacheserver_url: str
-    service: SeosnapService
-    extract_fields: Dict[str, str]
-    other_pages: List[str]
-
+    state: SeosnapState
     name = 'Seosnap'
 
-    def __init__(self, website_id, follow_next=True, recache=True) -> None:
-        self.service = SeosnapService()
-        self.website_id = website_id
-        self.follow_next = recache not in ['false', '0']
-        self.recache = recache not in ['false', '0']
-        self.cacheserver_url = os.getenv('CACHEWARMER_CACHE_SERVER_URL').rstrip('/')
-        self.website = self.service.get_website(self.website_id)
-
-        self.name = f'Cachewarm: {self.website["name"]}'
-        self.other_pages = [self.website["domain"]]
-        self.extract_fields = {field['name']: field["css_selector"] for field in self.website["extract_fields"]}
-        sitemap_urls = [self.website["sitemap"]]
-        super().__init__(sitemap_urls=sitemap_urls)
+    def __init__(self, *args, **kwargs) -> None:
+        self.state = SeosnapState(*args, **kwargs)
+        self.name = self.state.get_name()
+        super().__init__(sitemap_urls=self.state.sitemap_urls())
 
     def start_requests(self):
-        requests = [Request(url, self.parse) for url in self.other_pages]
-        requests += list(super().start_requests())
-        return requests
+        extra_urls = (Request(url, self.parse) for url in self.state.extra_pages())
+        return itertools.chain(extra_urls, super().start_requests())
 
     def parse(self, response: Response):
         data = {
             name: response.css(selector).extract_first()
-            for name, selector in self.extract_fields.items()
+            for name, selector in self.state.extract_fields.items()
         }
 
         # Follow next links
-        if self.follow_next:
+        if self.state.follow_next:
             rel_next_url = response.css('link[rel="next"]::attr(href), a[rel="next"]::attr(href)').extract_first()
             if rel_next_url is not None:
                 data['rel_next_url'] = rel_next_url
                 yield response.follow(rel_next_url, callback=self.parse)
 
         # Strip cacheserver from the url if possible
-        url = response.url[len(self.cacheserver_url):].lstrip('/')
+        url = response.url[len(self.state.cacheserver_url):].lstrip('/')
         url = urllib.urlparse(url)
         url = urllib.urlunparse(('', '', url.path, url.params, url.query, ''))
 

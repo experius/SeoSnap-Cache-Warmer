@@ -17,12 +17,24 @@ class SeosnapService:
         ))
         self.schema = self.client.get(os.getenv('API_URL'))
 
-    def get_website(self, website_id: int):
+    def get_website(self, website_id: int) -> dict:
         action = ["api", "websites", "read"]
         params = {"version": os.getenv('API_VER'), "id": website_id}
         return self.client.action(self.schema, action, params=params)
 
-    def update_pages(self, website_id: int, pages: List[dict]):
+    def update_pages(self, website_id: int, pages: List[dict]) -> List[dict]:
         action = ["api", "websites", "pages", "update_pages"]
         params = {"version": os.getenv('API_VER'), "website_id": website_id, "items": pages}
         return self.client.action(self.schema, action, params=params)
+
+    def get_queue(self, website_id: int) -> dict:
+        action = ["api", "websites", "queue_0"]
+        params = {"version": os.getenv('API_VER'), "website_id": website_id}
+        return self.client.action(self.schema, action, params=params)
+
+    def update_queue(self, website_id: int, queue_items: List[dict]) -> List[dict]:
+        action = ['api', 'websites', 'queue', 'update_queue']
+        params = {"version": os.getenv('API_VER'), "website_id": website_id, "items": queue_items}
+        return self.client.action(self.schema, action, params=params)
+
+
