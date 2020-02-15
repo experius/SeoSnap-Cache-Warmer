@@ -37,4 +37,9 @@ class SeosnapService:
         params = {"version": os.getenv('API_VER'), "website_id": website_id, "items": queue_items}
         return self.client.action(self.schema, action, params=params)
 
+    def clean_queue(self, website_id: int) -> List[dict]:
+        action = ['api', 'websites', 'queue', 'clean_queue']
+        params = {"version": os.getenv('API_VER'), "website_id": website_id}
+        return self.client.action(self.schema, action, params=params)
+
 
