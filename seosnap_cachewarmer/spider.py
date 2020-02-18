@@ -20,8 +20,11 @@ class SeosnapSpider(SitemapSpider):
         super().__init__(sitemap_urls=self.state.sitemap_urls())
 
     def start_requests(self):
-        extra_urls = (Request(url, self.parse) for url in self.state.extra_pages())
-        return itertools.chain(extra_urls, super().start_requests())
+        if self.state.load:
+            return (Request(url, self.parse) for url in self.state.get_load_urls())
+        else:
+            extra_urls = (Request(url, self.parse) for url in self.state.extra_pages())
+            return itertools.chain(extra_urls, super().start_requests())
 
     def parse(self, response: Response):
         data = {
