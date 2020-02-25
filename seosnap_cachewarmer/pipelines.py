@@ -15,7 +15,7 @@ class SeosnapPipeline(object):
         return pipeline
 
     def spider_opened(self, spider: SeosnapSpider):
-        self.exporter = SeosnapItemExporter(spider.website_id)
+        self.exporter = SeosnapItemExporter(spider.state.website_id, spider.state.use_queue)
         self.exporter.start_exporting()
 
     def spider_closed(self, spider):
