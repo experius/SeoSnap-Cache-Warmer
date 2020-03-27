@@ -2,8 +2,6 @@ version: '3.7'
 services:
   cachewarmer:
     build: .
-    volumes:
-      - .:/code
     image: seosnap_cachewarmer
     container_name: seosnap_cachewarmer
     networks:
