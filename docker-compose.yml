@@ -4,6 +4,17 @@ services:
     build: .
     image: seosnap_cachewarmer
     container_name: seosnap_cachewarmer
+    environment:
+      API_URL:
+      API_VER:
+      API_NAME:
+      API_PASS:
+      CACHEWARMER_CACHE_SERVER_URL:
+      CACHEWARMER_USER_AGENT:
+      CACHEWARMER_THREADS:
+      CACHEWARMER_CONCURRENT_REQUESTS:
+      CACHEWARMER_LOG_LEVEL:
+      CACHEWARMER_BUFFER_SIZE:
     networks:
       - seosnap_cachewarmer
 
