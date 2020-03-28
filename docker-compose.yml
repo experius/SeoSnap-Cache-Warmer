@@ -1,9 +1,11 @@
 version: '3.7'
 services:
   cachewarmer:
-    build: .
-    image: seosnap_cachewarmer
+    build:
+      context: .
+    image: experius/seosnap-cachewarmer
     container_name: seosnap_cachewarmer
+    restart: "no"
     environment:
       API_URL:
       API_VER:
