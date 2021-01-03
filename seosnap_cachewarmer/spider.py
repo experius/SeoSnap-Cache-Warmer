@@ -19,11 +19,19 @@ class SeosnapSpider(SitemapSpider):
         self.name = self.state.get_name()
         super().__init__(sitemap_urls=self.state.sitemap_urls())
 
+    def headers(self):
+        if self.state.mobile:
+            return {
+                'Rendertron-Mobile': 'True'
+            }
+        else:
+            return {}
+
     def start_requests(self):
         if self.state.load:
-            return (Request(url, self.parse) for url in self.state.get_load_urls())
+            return (Request(url, self.parse, headers=self.headers()) for url in self.state.get_load_urls())
         else:
-            extra_urls = (Request(url, self.parse) for url in self.state.extra_pages())
+            extra_urls = (Request(url, self.parse, headers=self.headers()) for url in self.state.extra_pages())
             return itertools.chain(extra_urls, super().start_requests())
 
     def parse(self, response: Response):

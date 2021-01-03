@@ -13,18 +13,28 @@ class SeosnapState:
     recache: bool
     use_queue: bool
     load: bool
+    mobile: bool
 
     cacheserver_url: str
     service: SeosnapService
     extract_fields: Dict[str, str]
 
-    def __init__(self, website_id, follow_next=True, recache=True, use_queue=False, load=False) -> None:
+    def __init__(
+            self,
+            website_id,
+            follow_next=True,
+            recache=True,
+            use_queue=False,
+            load=False,
+            mobile=False
+    ) -> None:
         self.service = SeosnapService()
         self.website_id = website_id
         self.use_queue = parse_bool(use_queue)
         self.load = parse_bool(load)
         self.follow_next = parse_bool(follow_next) and not self.use_queue and not self.load
         self.recache = parse_bool(recache) and not self.load
+        self.mobile = parse_bool(mobile)
 
         self.cacheserver_url = os.getenv('CACHEWARMER_CACHE_SERVER_URL').rstrip('/')
         self.website = self.service.get_website(self.website_id)
