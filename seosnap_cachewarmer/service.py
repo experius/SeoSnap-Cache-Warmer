@@ -42,4 +42,11 @@ class SeosnapService:
         params = {"version": os.getenv('API_VER'), "website_id": website_id}
         return self.client.action(self.schema, action, params=params)
 
+    def report_errors(self, website_id: int, errors: List[dict]) -> List[dict]:
+        errors = list(map(lambda x: {**x, 'time': x['time'].isoformat()}, errors))
+        action = ['api', 'websites', 'report_failure']
+        params = {"version": os.getenv('API_VER'), "website_id": website_id, "errors": errors}
+        return self.client.action(self.schema, action, params=params)
+
+
 
