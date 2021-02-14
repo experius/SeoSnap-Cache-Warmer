@@ -11,7 +11,7 @@ class CacheServerMiddleware(object):
 
         if CACHE_REQUEST_FLAG not in request.meta \
                 and request.url not in state.sitemap_urls() \
-                and not request.url.endswith('sitemap.xml') \
+                and not request.url.endswith('.xml') \
                 and state.cacheserver_url:
             request.meta[CACHE_REQUEST_FLAG] = True
             return request.replace(
