@@ -10,6 +10,7 @@ SPIDER_MIDDLEWARES = {
 
 DOWNLOADER_MIDDLEWARES = {
     'seosnap_cachewarmer.middleware.CacheServerMiddleware': 543,
+    'seosnap_cachewarmer.middleware.ErrorMiddleware': 543,
 }
 
 USER_AGENT = os.getenv('CACHEWARMER_USER_AGENT', 'Seosnap')
