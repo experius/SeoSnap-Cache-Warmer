@@ -1,4 +1,7 @@
+import logging
 import os
+from datetime import datetime, timedelta
+
 import requests
 from typing import Dict, Union, Iterable
 import urllib.parse as urllib
@@ -14,6 +17,7 @@ class SeosnapState:
     use_queue: bool
     load: bool
     mobile: bool
+    errors: list
 
     cacheserver_url: str
     service: SeosnapService
@@ -35,6 +39,7 @@ class SeosnapState:
         self.follow_next = parse_bool(follow_next) and not self.use_queue and not self.load
         self.recache = parse_bool(recache) and not self.load
         self.mobile = parse_bool(mobile)
+        self.errors = []
 
         self.cacheserver_url = os.getenv('CACHEWARMER_CACHE_SERVER_URL').rstrip('/')
         self.website = self.service.get_website(self.website_id)
@@ -74,6 +79,21 @@ class SeosnapState:
 
         urls = response.text.splitlines()
         for url in urls: yield url
+
+    def append_error(self, error):
+        self.errors.append(error)
+        max_range = datetime.now() - timedelta(seconds=self.website['notification_cooldown'])
+        for i in reversed(range(len(self.errors))):
+            if self.errors[i]['time'] < max_range:
+                self.errors.pop(i)
+
+        if len(self.errors) > self.website['notification_failure_rate']:
+            logging.debug('Reporting errors to the dashboard')
+            try:
+                self.service.report_errors(self.website_id, self.errors)
+            except Exception as e:
+                logging.error(f'Failed reporting errors to the dashboard: {e}')
+            self.errors = []
 
 
 def parse_bool(s: Union[str, bool]) -> bool:
