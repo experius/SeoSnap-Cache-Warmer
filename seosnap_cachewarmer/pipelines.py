@@ -26,7 +26,7 @@ class SeosnapPipeline(object):
         self.exporter.finish_exporting()
         self.service = SeosnapService()
 
-        if not spider.state.use_queue:
+        if not spider.state.use_queue and spider.state.clean_old_pages_after:
             self.service.clean_pages(spider.state.website_id, self.date)
 
     def process_item(self, item, spider):
