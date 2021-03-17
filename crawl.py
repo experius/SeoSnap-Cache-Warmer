@@ -42,19 +42,18 @@ def load(website_ids: str, **args):
 @click.option('--load', type=bool, default=False, help='Whether already loaded urls should be scraped instead')
 @click.option('--mobile', type=bool, default=False, help='Whether a mobile version should be rendered instead')
 def cache(website_ids: str, **args):
-    for website_id in website_ids.split(','):
-        click.echo(f'Caching website: {website_id}')
-        try:
-            settings = get_project_settings()
-            process = CrawlerProcess(settings)
+    try:
+        settings = get_project_settings()
+        process = CrawlerProcess(settings)
+        for website_id in website_ids.split(','):
             process.crawl(
                 SeosnapSpider,
                 website_id=website_id,
                 **args
             )
-            process.start()
-        except Exception as e:
-            click.echo(str(e), err=True)
+        process.start()
+    except Exception as e:
+        click.echo(str(e), err=True)
 
 
 @cli.command()
