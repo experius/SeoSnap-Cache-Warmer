@@ -18,6 +18,7 @@ Options:
   --recache BOOLEAN      Recached all pages instead of not yet cached ones
   --use_queue BOOLEAN    Cache urls from the queue instead of the sitemap
   --load BOOLEAN         Whether already loaded urls should be scraped instead
+  --clean_old_pages_after BOOLEAN Remove all pages where updated_at lower then the start of the finished crawl
   --help                 Show this message and exit.
 ```
 

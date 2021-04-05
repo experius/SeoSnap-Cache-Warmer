@@ -38,6 +38,7 @@ def load(website_ids: str, **args):
 @click.argument('website_ids')
 @click.option('--follow_next', type=bool, default=True, help='Follows rel-next links if enabled')
 @click.option('--recache', type=bool, default=True, help='Recached all pages instead of not yet cached ones')
+@click.option('--clean_old_pages_after', type=bool, default=False, help='Remove all pages where updated_at lower then the start of the finished crawl')
 @click.option('--use_queue', type=bool, default=False, help='Cache urls from the queue instead of the sitemap')
 @click.option('--load', type=bool, default=False, help='Whether already loaded urls should be scraped instead')
 @click.option('--mobile', type=bool, default=False, help='Whether a mobile version should be rendered instead')
