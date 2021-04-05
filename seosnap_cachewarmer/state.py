@@ -18,6 +18,7 @@ class SeosnapState:
     load: bool
     mobile: bool
     errors: list
+    clean_old_pages_after: bool
 
     cacheserver_url: str
     service: SeosnapService
@@ -30,11 +31,13 @@ class SeosnapState:
             recache=True,
             use_queue=False,
             load=False,
-            mobile=False
+            mobile=False,
+            clean_old_pages_after=False
     ) -> None:
         self.service = SeosnapService()
         self.website_id = website_id
         self.use_queue = parse_bool(use_queue)
+        self.clean_old_pages_after = parse_bool(clean_old_pages_after)
         self.load = parse_bool(load)
         self.follow_next = parse_bool(follow_next) and not self.use_queue and not self.load
         self.recache = parse_bool(recache) and not self.load
