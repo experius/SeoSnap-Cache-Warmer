@@ -21,7 +21,7 @@ class CacheServerMiddleware(object):
             request.meta[CACHE_REQUEST_FLAG] = True
             return request.replace(
                 url=f'{state.cacheserver_url}/{request.url}',
-                method='PUT' if state.recache else 'GET'
+                method='GET' if state.recache else 'GET'
             )
         return None
 
