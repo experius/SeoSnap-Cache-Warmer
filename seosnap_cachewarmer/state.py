@@ -30,7 +30,6 @@ class SeosnapState:
             follow_next=True,
             recache=True,
             use_queue=False,
-            load=False,
             mobile=False,
             clean_old_pages_after=False
     ) -> None:
@@ -38,9 +37,8 @@ class SeosnapState:
         self.website_id = website_id
         self.use_queue = parse_bool(use_queue)
         self.clean_old_pages_after = parse_bool(clean_old_pages_after)
-        self.load = parse_bool(load)
-        self.follow_next = parse_bool(follow_next) and not self.use_queue and not self.load
-        self.recache = parse_bool(recache) and not self.load
+        self.follow_next = parse_bool(follow_next) and not self.use_queue
+        self.recache = parse_bool(recache)
         self.mobile = parse_bool(mobile)
         self.errors = []
 
@@ -73,15 +71,6 @@ class SeosnapState:
             for item in items:
                 path = item['page']['address']
                 yield f'{root_domain}{path}'
-
-    def get_load_urls(self) -> Iterable[str]:
-        uri = urllib.urlparse(self.website['domain'])
-        root_domain = f'{uri.scheme}://{uri.netloc}'
-        response = requests.get(urllib.urljoin(self.cacheserver_url, f'/list/{root_domain}'))
-        if response.status_code // 200 != 1: yield
-
-        urls = response.text.splitlines()
-        for url in urls: yield url
 
     def append_error(self, error):
         self.errors.append(error)
