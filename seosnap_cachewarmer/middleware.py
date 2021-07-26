@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from scrapy import Request, signals
-from scrapy.downloadermiddlewares.retry import RetryMiddleware
+import urllib.parse as urllib
 from scrapy.http import Response
 
 from seosnap_cachewarmer.spider import SeosnapSpider
@@ -19,9 +19,17 @@ class CacheServerMiddleware(object):
                 and not request.url.endswith('.xml') \
                 and state.cacheserver_url:
             request.meta[CACHE_REQUEST_FLAG] = True
+
+            # Quote the request params as required by rendertron
+            url = urllib.quote(request.url, safe='/:')
+            # Add mobile param if we are rendering mobile pages
+            params = {}
+            if state.recache: params['refreshCache'] = 'true'
+            if state.mobile: params['mobile'] = 1
+
             return request.replace(
-                url=f'{state.cacheserver_url}/{request.url}',
-                method='PUT' if state.recache else 'GET'
+                url=f'{state.cacheserver_url}/{url}?{urllib.urlencode(params)}',
+                method='GET' if state.recache else 'GET'
             )
         return None
 
