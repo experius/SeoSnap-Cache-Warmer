@@ -3,7 +3,7 @@ services:
   cachewarmer:
     build:
       context: .
-    image: experiusnl/seosnap-cachewarmer:${TAG}
+    image: experiusnl/seosnap-cachewarmer
     container_name: seosnap_cachewarmer
     restart: "no"
     environment:

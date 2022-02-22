@@ -17,6 +17,7 @@ class SeosnapSpider(SitemapSpider):
     name = 'Seosnap'
 
     def __init__(self, *args, **kwargs) -> None:
+        print(' ----- __init__ -- ')
         self.state = SeosnapState(*args, **kwargs)
         self.name = self.state.get_name()
         super().__init__(sitemap_urls=self.state.sitemap_urls())
@@ -25,10 +26,19 @@ class SeosnapSpider(SitemapSpider):
         return {}
 
     def start_requests(self):
+        print(' ----- start request -- ')
+
         extra_urls = (Request(url, self.parse, headers=self.headers()) for url in self.state.extra_pages())
+
+        print('extra urls ' + extra_urls.__str__())
+
         return itertools.chain(extra_urls, super().start_requests())
 
     def parse(self, response: Response):
+        print(' ----- parse -- ')
+        print(response.url)
+        # print(response.body)
+
         data = {
             name: response.css(selector).extract_first()
             for name, selector in self.state.extract_fields.items()
@@ -49,10 +59,14 @@ class SeosnapSpider(SitemapSpider):
         # Build page entity for dashboard
         cached = bytes_to_str(response.headers.get('Rendertron-Cached', None))
         cached_at = bytes_to_str(response.headers.get('Rendertron-Cached-At', None))
+
+        print(' ----- CHECKKK -- ')
+
         yield {
             'address': url,
             'content_type': bytes_to_str(response.headers.get('Content-Type', None)),
             'status_code': response.status,
+            'x_magento_tags': bytes_to_str(response.body),
             'cache_status': 'cached' if cached == '1' or response.status == 200 else 'not-cached',
             'cached_at': cached_at,
             'extract_fields': data
