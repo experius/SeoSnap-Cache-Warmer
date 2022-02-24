@@ -4,10 +4,12 @@ import os
 import urllib.parse as urllib
 from datetime import datetime
 from typing import Dict, List
+import json
 
 from scrapy import Request
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
+from scrapy.selector import Selector
 
 from seosnap_cachewarmer.state import SeosnapState
 
@@ -37,16 +39,18 @@ class SeosnapSpider(SitemapSpider):
     def parse(self, response: Response):
         print(' ----- parse -- ')
         print(response.url)
+        response_body_json = json.loads(response.body)
         # print(response.body)
 
         data = {
-            name: response.css(selector).extract_first()
+            name: Selector(text=response_body_json['html']).css(selector).extract_first()
             for name, selector in self.state.extract_fields.items()
         }
 
         # Follow next links
+        # TODO because of the new response this doesn't work properly
         if self.state.follow_next:
-            rel_next_url = response.css('link[rel="next"]::attr(href), a[rel="next"]::attr(href)').extract_first()
+            rel_next_url = Selector(text=response_body_json['html']).css('link[rel="next"]::attr(href), a[rel="next"]::attr(href)').extract_first()
             if rel_next_url is not None:
                 data['rel_next_url'] = rel_next_url
                 yield response.follow(rel_next_url, callback=self.parse)
@@ -66,7 +70,7 @@ class SeosnapSpider(SitemapSpider):
             'address': url,
             'content_type': bytes_to_str(response.headers.get('Content-Type', None)),
             'status_code': response.status,
-            'x_magento_tags': bytes_to_str(response.body),
+            'x_magento_tags': response_body_json['tags'],
             'cache_status': 'cached' if cached == '1' or response.status == 200 else 'not-cached',
             'cached_at': cached_at,
             'extract_fields': data
