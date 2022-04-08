@@ -22,6 +22,10 @@ class SeosnapSpider(SitemapSpider):
         print(' ----- __init__ -- ')
         self.state = SeosnapState(*args, **kwargs)
         self.name = self.state.get_name()
+
+        print(self.state.sitemap_urls())
+        print(' --- test  xxx --')
+
         super().__init__(sitemap_urls=self.state.sitemap_urls())
 
     def headers(self):
@@ -48,7 +52,6 @@ class SeosnapSpider(SitemapSpider):
         }
 
         # Follow next links
-        # TODO because of the new response this doesn't work properly
         if self.state.follow_next:
             rel_next_url = Selector(text=response_body_json['html']).css('link[rel="next"]::attr(href), a[rel="next"]::attr(href)').extract_first()
             if rel_next_url is not None:
@@ -65,6 +68,12 @@ class SeosnapSpider(SitemapSpider):
         cached_at = bytes_to_str(response.headers.get('Rendertron-Cached-At', None))
 
         print(' ----- CHECKKK -- ')
+
+        url = url.replace('?refreshCache=true', '')
+        url = url.replace('?refreshCache=false', '')
+        url = url.replace('%3F', '?')
+        url = url.replace('%3D', '=')
+        print(url)
 
         yield {
             'address': url,
