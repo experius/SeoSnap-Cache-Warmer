@@ -53,5 +53,9 @@ class SeosnapService:
         params = {"version": os.getenv('API_VER'), "website_id": website_id, "errors": errors}
         return self.client.action(self.schema, action, params=params)
 
+    def sync_pages(self, website_id: int):
+        action = ['api', 'websites', 'pages', 'sync']
+        params = {"version": os.getenv('API_VER'), "website_id": website_id}
+        return self.client.action(self.schema, action, params=params)
 
 

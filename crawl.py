@@ -88,68 +88,10 @@ def cache(website_ids: str, **args):
 
 @cli.command()
 @click.argument('website_id')
-def test(website_id: str, *args, **kwargs):
+def sync(website_id: str, *args, **kwargs):
     print('Start test')
-    state = SeosnapState(website_id=website_id, **kwargs)
-
-    for url in state.sitemap_urls():
-        print(url)
-
-        r = requests.get(url)
-        root = ET.fromstring(r.text)
-
-        xmlDict = {}
-        for sitemap in root:
-            children = list(sitemap)
-
-            # 0 is the loc (url)
-            # 1 is the last modified
-            xmlDict[children[0].text] = children[1].text
-        print(xmlDict)
-
-
-
-
-
-
-
-# @cli.command()
-# @click.argument('website_id')
-# def test(website_id: str, *args, **kwargs):
-#     try:
-#         state = SeosnapState(website_id=website_id, **kwargs)
-#
-#         print('try')
-#         r = requests.get('')
-#         xml = r.text
-#
-#         # # settings = get_project_settings()
-#         # state = SeosnapState(website_id=website_id, **kwargs)
-#         # # seoSnapSitemapRefresher = SeoSnapSitemapRefresher(state)
-#         # settings = get_project_settings()
-#         # # process = CrawlerProcess(settings)
-#         # # settings = get_project_settings()
-#         # # process = CrawlerProcess()
-#         # #
-#         # # process.crawl(
-#         # #     SeoSnapSitemapRefresher,
-#         # #     website_id=website_id,
-#         # #     *args
-#         # # )
-#         # # print("starttt")
-#         # # process.start()
-#         # print("hoi?")
-#         #
-#         # # seoSnapSitemapRefresher = SeoSnapSitemapRefresher(state)
-#         #
-#         # process = CrawlerProcess(settings)
-#         # process.crawl(SeoSnapSitemapRefresher, website_id=website_id, *args)
-#         # # print("print all")
-#         # # for url in seoSnapSitemapRefresher.get_urls():
-#         # #     print(url)
-#         # process.start()
-#     except Exception as e:
-#         click.echo(str(e), err=True)
+    service = SeosnapService()
+    service.sync_pages(website_id)
 
 
 @cli.command()
