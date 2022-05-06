@@ -37,7 +37,7 @@ class SeosnapState:
         self.website_id = website_id
         self.use_queue = parse_bool(use_queue)
         self.clean_old_pages_after = parse_bool(clean_old_pages_after)
-        self.follow_next = parse_bool(follow_next) and not self.use_queue
+        self.follow_next = parse_bool(follow_next)
         self.recache = parse_bool(recache)
         self.mobile = parse_bool(mobile)
         self.errors = []

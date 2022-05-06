@@ -52,9 +52,19 @@ class SeosnapSpider(SitemapSpider):
         }
 
         # Follow next links
+        print("test <--------------")
+        print(self.state.follow_next)
+
         if self.state.follow_next:
             rel_next_url = Selector(text=response_body_json['html']).css('link[rel="next"]::attr(href), a[rel="next"]::attr(href)').extract_first()
+            print(' ----- NEXT url -- ')
+            print(rel_next_url)
             if rel_next_url is not None:
+                rel_next_url = rel_next_url.replace('?refreshCache=true', '')
+                rel_next_url = rel_next_url.replace('?refreshCache=false', '')
+                rel_next_url = rel_next_url.replace('%3F', '?')
+                rel_next_url = rel_next_url.replace('%3D', '=')
+
                 data['rel_next_url'] = rel_next_url
                 yield response.follow(rel_next_url, callback=self.parse)
 
