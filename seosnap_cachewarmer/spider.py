@@ -87,7 +87,7 @@ class SeosnapSpider(SitemapSpider):
 
         yield {
             'address': url,
-            'content_type': bytes_to_str(response.headers.get('Content-Type', None)),
+            'content_type': 'text/html; charset=utf-8',
             'status_code': response.status,
             'x_magento_tags': response_body_json['tags'],
             'cache_status': 'cached' if cached == '1' or response.status == 200 else 'not-cached',
