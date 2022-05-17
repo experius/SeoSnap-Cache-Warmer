@@ -60,17 +60,22 @@ class SeosnapSpider(SitemapSpider):
             print(' ----- NEXT url -- ')
             print(rel_next_url)
             if rel_next_url is not None:
-                rel_next_url = rel_next_url.replace('?refreshCache=true', '')
-                rel_next_url = rel_next_url.replace('?refreshCache=false', '')
-                rel_next_url = rel_next_url.replace('%3F', '?')
-                rel_next_url = rel_next_url.replace('%3D', '=')
+                rel_next_url = urllib.urlparse(rel_next_url)
 
-                data['rel_next_url'] = rel_next_url
-                yield response.follow(rel_next_url, callback=self.parse)
+                query2 = urllib.parse_qs(rel_next_url.query)
+                query2.pop('refreshCache', None)
+                rel_next_url = rel_next_url._replace(query=urllib.urlencode(query2, True))
+
+                data['rel_next_url'] = rel_next_url.geturl()
+                yield response.follow(rel_next_url.geturl(), callback=self.parse)
 
         # Strip cacheserver from the url if possible
         url = response.url[len(self.state.cacheserver_url):].lstrip('/')
         url = urllib.urlparse(url)
+        query = urllib.parse_qs(url.query)
+        query.pop('refreshCache', None)
+        url = url._replace(query=urllib.urlencode(query, True))
+
         url = urllib.urlunparse(('', '', url.path, url.params, url.query, ''))
 
         # Build page entity for dashboard
@@ -78,11 +83,6 @@ class SeosnapSpider(SitemapSpider):
         cached_at = bytes_to_str(response.headers.get('Rendertron-Cached-At', None))
 
         print(' ----- CHECKKK -- ')
-
-        url = url.replace('?refreshCache=true', '')
-        url = url.replace('?refreshCache=false', '')
-        url = url.replace('%3F', '?')
-        url = url.replace('%3D', '=')
         print(url)
 
         yield {
