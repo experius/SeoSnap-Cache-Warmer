@@ -57,8 +57,11 @@ class SeosnapSpider(SitemapSpider):
 
         if self.state.follow_next:
             rel_next_url = Selector(text=response_body_json['html']).css('link[rel="next"]::attr(href), a[rel="next"]::attr(href)').extract_first()
+
+            print(response_body_json['html'])
             print(' ----- NEXT url -- ')
             print(rel_next_url)
+
             if rel_next_url is not None:
                 rel_next_url = urllib.urlparse(rel_next_url)
 
