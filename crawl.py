@@ -87,11 +87,21 @@ def cache(website_ids: str, **args):
 
 
 @cli.command()
-@click.argument('website_id')
-def sync(website_id: str, *args, **kwargs):
-    print('Start test')
-    service = SeosnapService()
-    service.sync_pages(website_id)
+@click.argument('website_ids')
+def sync(website_ids: str, *args, **kwargs):
+    print('Start sync')
+    for website_id in website_ids.split(','):
+        service = SeosnapService()
+        service.sync_pages(website_id)
+
+
+@cli.command()
+@click.argument('website_ids')
+def redooldqueue(website_ids: str, *args, **kwargs):
+    print('Start redo')
+    for website_id in website_ids.split(','):
+        service = SeosnapService()
+        service.queue_old_redo(website_id)
 
 
 @cli.command()

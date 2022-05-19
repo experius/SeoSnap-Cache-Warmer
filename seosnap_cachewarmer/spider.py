@@ -58,16 +58,21 @@ class SeosnapSpider(SitemapSpider):
         if self.state.follow_next:
             rel_next_url = Selector(text=response_body_json['html']).css('link[rel="next"]::attr(href), a[rel="next"]::attr(href)').extract_first()
 
-            print(response_body_json['html'])
             print(' ----- NEXT url -- ')
             print(rel_next_url)
 
             if rel_next_url is not None:
                 rel_next_url = urllib.urlparse(rel_next_url)
+                rel_next_url_query = urllib.parse_qs(rel_next_url.query)
+                rel_next_url_query.pop('refreshCache', None)
 
-                query2 = urllib.parse_qs(rel_next_url.query)
-                query2.pop('refreshCache', None)
-                rel_next_url = rel_next_url._replace(query=urllib.urlencode(query2, True))
+                old_url_parsed = urllib.urlparse(response.url)
+                old_url_query = urllib.parse_qs(old_url_parsed.query)
+
+                if 'mobile' in old_url_query and old_url_query['mobile']:
+                    rel_next_url_query.update({'mobile': '1'})
+
+                rel_next_url = rel_next_url._replace(query=urllib.urlencode(rel_next_url_query, True))
 
                 data['rel_next_url'] = rel_next_url.geturl()
                 yield response.follow(rel_next_url.geturl(), callback=self.parse)

@@ -42,19 +42,33 @@ class CacheServerMiddleware(object):
             request.meta[CACHE_REQUEST_FLAG] = True
 
             # Quote the request params as required by rendertron
-            url = urllib.quote(request.url, safe='/:')
+            url = request.url
+
             # Add mobile param if we are rendering mobile pages
             params = {}
             if state.recache: params['refreshCache'] = 'true'
 
+            print("test")
             if 'mobile' in urllib.parse_qs(parsed_url.query) and urllib.parse_qs(parsed_url.query)['mobile']:
+                print("test2")
                 params['mobile'] = 1
+                print(url)
+                new_url = urllib.urlparse(url)
+                query = urllib.parse_qs(new_url.query)
+                print(query)
+                query.pop('mobile', None)
+                new_url = new_url._replace(query=urllib.urlencode(query, True))
+                print(new_url)
+                url = new_url.geturl()
+                print("xasdaskdsa")
+                print(url)
 
-            if 'page' in urllib.parse_qs(parsed_url.query) and urllib.parse_qs(parsed_url.query)['page']:
-                params['page'] = urllib.parse_qs(parsed_url.query)['page'][0]
+            print("test3")
+
+            url = urllib.quote(url, safe='/:')
 
             return request.replace(
-                url=f'{state.cacheserver_url}/{parsed_url.scheme}://{parsed_url.hostname}{parsed_url.path}?{urllib.urlencode(params)}',
+                url=f'{state.cacheserver_url}/{url}?{urllib.urlencode(params)}',
                 method='GET' if state.recache else 'GET'
             )
         return None
