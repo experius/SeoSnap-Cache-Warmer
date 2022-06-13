@@ -11,7 +11,7 @@ class SeosnapItemExporter(BaseItemExporter):
     service: SeosnapService
     use_queue: bool
     buffer: List[dict]
-    buffer_size: int = int(os.getenv('CACHEWARMER_BUFFER_SIZE', 50))
+    buffer_size: int = int(os.getenv('CACHEWARMER_BUFFER_SIZE', 2))
 
     def __init__(self, website_id, use_queue=False, buffer_size=None, **kwargs):
         super().__init__(**kwargs)

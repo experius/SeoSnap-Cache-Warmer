@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os, sys, logging
 
+import requests
 import click
 from functools import reduce
 from dotenv import load_dotenv
@@ -11,6 +12,10 @@ from scrapy.utils.project import get_project_settings
 
 from seosnap_cachewarmer.service import SeosnapService
 from seosnap_cachewarmer.spider import SeosnapSpider
+# from seosnap_cachewarmer.tagSpider import SeosnapTagSpider
+from seosnap_cachewarmer.state import SeosnapState
+from seosnap_cachewarmer.sitemap import SeoSnapSitemapRefresher
+import xml.etree.ElementTree as ET
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
 configure_logging(install_root_handler=False)
@@ -34,6 +39,31 @@ def load(website_ids: str, **args):
         execute(argv=[sys.argv[0], 'crawl', 'Seosnap', '-a', f'website_id={website_id}'] + arg_tokens)
 
 
+# @cli.command()
+# @click.argument('website_ids')
+# @click.argument('tag')
+# def tag(website_ids: str, tag: str, **args):
+#     print("-- start recacheByTag --")
+#     print("test1 ckasdhlasd")
+#     print(website_ids)
+#     print(tag)
+#
+#     try:
+#         settings = get_project_settings()
+#         process = CrawlerProcess(settings)
+#         for website_id in website_ids.split(','):
+#             process.crawl(
+#                 SeosnapTagSpider,
+#                 website_id=website_id,
+#                 tag=tag,
+#                 **args
+#             )
+#         process.start()
+#     except Exception as e:
+#         click.echo(str(e), err=True)
+
+
+
 @cli.command()
 @click.argument('website_ids')
 @click.option('--follow_next', type=bool, default=True, help='Follows rel-next links if enabled')
@@ -54,6 +84,24 @@ def cache(website_ids: str, **args):
         process.start()
     except Exception as e:
         click.echo(str(e), err=True)
+
+
+@cli.command()
+@click.argument('website_ids')
+def sync(website_ids: str, *args, **kwargs):
+    print('Start sync')
+    for website_id in website_ids.split(','):
+        service = SeosnapService()
+        service.sync_pages(website_id)
+
+
+@cli.command()
+@click.argument('website_ids')
+def redooldqueue(website_ids: str, *args, **kwargs):
+    print('Start redo')
+    for website_id in website_ids.split(','):
+        service = SeosnapService()
+        service.queue_old_redo(website_id)
 
 
 @cli.command()
