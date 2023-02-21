@@ -38,32 +38,6 @@ def load(website_ids: str, **args):
         arg_tokens = reduce(lambda x, y: x + y, [['-a', f'{k}={v}'] for k, v in args.items()])
         execute(argv=[sys.argv[0], 'crawl', 'Seosnap', '-a', f'website_id={website_id}'] + arg_tokens)
 
-
-# @cli.command()
-# @click.argument('website_ids')
-# @click.argument('tag')
-# def tag(website_ids: str, tag: str, **args):
-#     print("-- start recacheByTag --")
-#     print("test1 ckasdhlasd")
-#     print(website_ids)
-#     print(tag)
-#
-#     try:
-#         settings = get_project_settings()
-#         process = CrawlerProcess(settings)
-#         for website_id in website_ids.split(','):
-#             process.crawl(
-#                 SeosnapTagSpider,
-#                 website_id=website_id,
-#                 tag=tag,
-#                 **args
-#             )
-#         process.start()
-#     except Exception as e:
-#         click.echo(str(e), err=True)
-
-
-
 @cli.command()
 @click.argument('website_ids')
 @click.option('--follow_next', type=bool, default=True, help='Follows rel-next links if enabled')
